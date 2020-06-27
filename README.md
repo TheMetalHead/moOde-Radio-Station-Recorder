@@ -1,4 +1,4 @@
-# moode-radio-station-recorder
+# moOde-radio-station-recorder
 
 Instructions for a simple radio station recorder for moOde http://moodeaudio.org/.
 

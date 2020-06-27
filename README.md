@@ -70,7 +70,8 @@ Exit nano.
 
 Make a directory for the recordings in a suitable location. This will be used as the name that will appear in the moOde library panel:
 
-eg    cd /home/pi/Music
+eg
+    cd /home/pi/Music
 
     mkdir Recordings
 
@@ -110,9 +111,9 @@ Example to rip as one track.
 
 Create the stream to rip:
 
-    Name of stream:                              RockRadio1 - One track
+    Name of stream:                    RockRadio1 - One track
     Uniform Resource Locator (URL):    http://192.99.147.61:8000
-    Additional Parameter:                       -k 0 -o always
+    Additional Parameter:              -k 0 -o always
 
 You may need to add -u "FreeAmp/2.x" to the 'Additional Parameter' when creating the stream to rip.
 
@@ -143,13 +144,13 @@ Places the recording in the 'Recordings' directory as 'RockRadio1 - 2020_06_26_2
 
 Create the recording schedule:
 
-    Stream:                RockRadio1 - One track
+    Stream:                  RockRadio1 - One track
     Date:                    Set as required.
     Time:                    Set as required.
-    Duration:              Set as required.
-    Name of track:      Give it a suitable name. eg The Rock Show.
-    Repeating:            Select the days to record from or leave blank for one day.
-                                     eg tick Mon to record every monday.
+    Duration:                Set as required.
+    Name of track:           Give it a suitable name. eg The Rock Show.
+    Repeating:               Select the days to record from or leave blank for one day.
+                               eg tick Mon to record every monday.
 
 
 
@@ -157,21 +158,21 @@ Example to rip into individual tracks.
 
 Create the stream to rip:
 
-    Name of stream:                             RockRadio1 - Rip tracks
+    Name of stream:                   RockRadio1 - Rip tracks
     Uniform Resource Locator (URL):   http://192.99.147.61:8000
-    Additional Parameter:                        -D "%A - %T" -k 0 -o always
+    Additional Parameter:             -D "%A - %T" -k 0 -o always
 
 
 
 Create the schedule:
 
-    Stream:                RockRadio1 - Rip tracks
+    Stream:                  RockRadio1 - Rip tracks
     Date:                    Set as required.
     Time:                    Set as required.
-    Duration:              Set as required.
-    Name of track:      Leave as automatic track detection.
-    Repeating:            Select the days to record from or leave blank for one day.
-                                     eg tick Mon to record every monday.
+    Duration:                Set as required.
+    Name of track:           Leave as automatic track detection.
+    Repeating:               Select the days to record from or leave blank for one day.
+                               eg tick Mon to record every monday.
 
 
 
@@ -185,11 +186,11 @@ Create the schedule:
     %A        Artist
     %T        Title
     %a        Album
-    %D       Date and time (per song)
+    %D        Date and time (per song)
     %d        Date and time (per execution)
     %q        Sequence number (automatic detection)
-    %Nq      Sequence number (starting from number N)
-    %%       Percent sign
+    %Nq       Sequence number (starting from number N)
+    %%        Percent sign
 
 -a [pattern]
 # Sometimes you want the stream recorded to a single (big) file
@@ -208,14 +209,14 @@ Using the -A option, the individual files for each track are not created.
 
 
 
-To use via moOde:
+To access the saved recordings via moOde:
 
     Go to the library panel.
     Select Recordings.
 
 
 
-Info:
+Additional info:
 
     https://sourceforge.net/projects/radiorecwebgui/
     http://streamripper.sourceforge.net/faq.php

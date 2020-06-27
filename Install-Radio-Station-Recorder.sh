@@ -2,6 +2,8 @@
 #
 # Install the radio staion recorder software for 'moOde'.
 #
+# Usage:      Install-Radio-Station-Recorder.sh   Web-server-root-directory   Web-server-port   Recordings-Storage-Root-Directory   Recordings-Directory
+#
 ##################################################################
 ##################################################################
 ##################################################################
@@ -12,9 +14,9 @@
 ##################################################################
 ##################################################################
 #
-# (c) 2020 - TheMetalHead - https://github.com/TheMetalHead/moOde-radio-station-recorder
+# (c) 2020 - TheMetalHead - https://github.com/TheMetalHead/moOde-Radio-Station-Recorder
 #
-# TheMetalHead/moOde-CD-Rip-and-Play is licensed under the GNU General Public License v3.0
+# TheMetalHead/moOde-Radio-Station-Recorder is licensed under the GNU General Public License v3.0
 #
 # Permissions of this strong copyleft license are conditioned on making available complete
 # source code of licensed works and modifications, which include larger works using a
@@ -45,90 +47,98 @@
 # Work out this files name, path and config pathname.
 ##################################################################
 
-# Returns full path and name of this script.
-# /home/pi/Src/RadioRecorder/Install-Radio-Station-Recorder.sh
+# Returns the full path and name of this script.
+# /home/pi/RadioRecorder/Install-Radio-Station-Recorder.sh
 readonly	FULLPATHNAME=$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null||echo "$0")
 
 # The directory where this script resides.
-# /home/pi/Src/RadioRecorder
+# /home/pi/RadioRecorder
 readonly	DIRECTORY=$(dirname "${FULLPATHNAME}")
+
+readonly	RADIO_RECORDER_DIR="RadioRecorder"
+
+readonly	WEB_SERVER_IP=$(hostname -I)
+
+readonly	OWNER="pi:pi"
+
+readonly	DOWNLOAD_RADIO_REC_WEB_GUI="https://sourceforge.net/projects/radiorecwebgui/files/latest/download"
 
 ##################################################################
 # Colour constants.
 ##################################################################
 
 # Reset
-Colour_Off='\033[0m'      # Text Reset
+readonly	Colour_Off='\033[0m'      # Text Reset
 
 # Regular Colours
-Black='\033[0;30m'        # Black
-Red='\033[0;31m'          # Red
-Green='\033[0;32m'        # Green
-Yellow='\033[0;33m'       # Yellow
-Blue='\033[0;34m'         # Blue
-Purple='\033[0;35m'       # Purple
-Cyan='\033[0;36m'         # Cyan
-White='\033[0;37m'        # White
+readonly	Black='\033[0;30m'        # Black
+readonly	Red='\033[0;31m'          # Red
+readonly	Green='\033[0;32m'        # Green
+readonly	Yellow='\033[0;33m'       # Yellow
+readonly	Blue='\033[0;34m'         # Blue
+readonly	Purple='\033[0;35m'       # Purple
+readonly	Cyan='\033[0;36m'         # Cyan
+readonly	White='\033[0;37m'        # White
 
 # Bold
-BBlack='\033[1;30m'       # Black
-BRed='\033[1;31m'         # Red
-BGreen='\033[1;32m'       # Green
-BYellow='\033[1;33m'      # Yellow
-BBlue='\033[1;34m'        # Blue
-BPurple='\033[1;35m'      # Purple
-BCyan='\033[1;36m'        # Cyan
-BWhite='\033[1;37m'       # White
+readonly	BBlack='\033[1;30m'       # Black
+readonly	BRed='\033[1;31m'         # Red
+readonly	BGreen='\033[1;32m'       # Green
+readonly	BYellow='\033[1;33m'      # Yellow
+readonly	BBlue='\033[1;34m'        # Blue
+readonly	BPurple='\033[1;35m'      # Purple
+readonly	BCyan='\033[1;36m'        # Cyan
+readonly	BWhite='\033[1;37m'       # White
 
 # Underline
-UBlack='\033[4;30m'       # Black
-URed='\033[4;31m'         # Red
-UGreen='\033[4;32m'       # Green
-UYellow='\033[4;33m'      # Yellow
-UBlue='\033[4;34m'        # Blue
-UPurple='\033[4;35m'      # Purple
-UCyan='\033[4;36m'        # Cyan
-UWhite='\033[4;37m'       # White
+readonly	UBlack='\033[4;30m'       # Black
+readonly	URed='\033[4;31m'         # Red
+readonly	UGreen='\033[4;32m'       # Green
+readonly	UYellow='\033[4;33m'      # Yellow
+readonly	UBlue='\033[4;34m'        # Blue
+readonly	UPurple='\033[4;35m'      # Purple
+readonly	UCyan='\033[4;36m'        # Cyan
+readonly	UWhite='\033[4;37m'       # White
 
 # Background
-On_Black='\033[40m'       # Black
-On_Red='\033[41m'         # Red
-On_Green='\033[42m'       # Green
-On_Yellow='\033[43m'      # Yellow
-On_Blue='\033[44m'        # Blue
-On_Purple='\033[45m'      # Purple
-On_Cyan='\033[46m'        # Cyan
-On_White='\033[47m'       # White
+readonly	On_Black='\033[40m'       # Black
+readonly	On_Red='\033[41m'         # Red
+readonly	On_Green='\033[42m'       # Green
+readonly	On_Yellow='\033[43m'      # Yellow
+readonly	On_Blue='\033[44m'        # Blue
+readonly	On_Purple='\033[45m'      # Purple
+readonly	On_Cyan='\033[46m'        # Cyan
+readonly	On_White='\033[47m'       # White
 
 # High Intensity
-IBlack='\033[0;90m'       # Black
-IRed='\033[0;91m'         # Red
-IGreen='\033[0;92m'       # Green
-IYellow='\033[0;93m'      # Yellow
-IBlue='\033[0;94m'        # Blue
-IPurple='\033[0;95m'      # Purple
-ICyan='\033[0;96m'        # Cyan
-IWhite='\033[0;97m'       # White
+readonly	IBlack='\033[0;90m'       # Black
+readonly	IRed='\033[0;91m'         # Red
+readonly	IGreen='\033[0;92m'       # Green
+readonly	IYellow='\033[0;93m'      # Yellow
+readonly	IBlue='\033[0;94m'        # Blue
+readonly	IPurple='\033[0;95m'      # Purple
+readonly	ICyan='\033[0;96m'        # Cyan
+readonly	IWhite='\033[0;97m'       # White
 
 # Bold High Intensity
-BIBlack='\033[1;90m'      # Black
-BIRed='\033[1;91m'        # Red
-BIGreen='\033[1;92m'      # Green
-BIYellow='\033[1;93m'     # Yellow
-BIBlue='\033[1;94m'       # Blue
-BIPurple='\033[1;95m'     # Purple
-BICyan='\033[1;96m'       # Cyan
-BIWhite='\033[1;97m'      # White
+readonly	BIBlack='\033[1;90m'      # Black
+readonly	BIRed='\033[1;91m'        # Red
+readonly	BIGreen='\033[1;92m'      # Green
+readonly	BIYellow='\033[1;93m'     # Yellow
+readonly	BIBlue='\033[1;94m'       # Blue
+readonly	BIPurple='\033[1;95m'     # Purple
+readonly	BICyan='\033[1;96m'       # Cyan
+readonly	BIWhite='\033[1;97m'      # White
 
 # High Intensity backgrounds
-On_IBlack='\033[0;100m'   # Black
-On_IRed='\033[0;101m'     # Red
-On_IGreen='\033[0;102m'   # Green
-On_IYellow='\033[0;103m'  # Yellow
-On_IBlue='\033[0;104m'    # Blue
-On_IPurple='\033[0;105m'  # Purple
-On_ICyan='\033[0;106m'    # Cyan
-On_IWhite='\033[0;107m'   # White
+readonly	On_IBlack='\033[0;100m'   # Black
+readonly	On_IRed='\033[0;101m'     # Red
+readonly	On_IGreen='\033[0;102m'   # Green
+readonly	On_IYellow='\033[0;103m'  # Yellow
+readonly	On_IBlue='\033[0;104m'    # Blue
+readonly	On_IPurple='\033[0;105m'  # Purple
+readonly	On_ICyan='\033[0;106m'    # Cyan
+readonly	On_IWhite='\033[0;107m'   # White
 
 ##################################################################
 # Utility functions.
@@ -146,6 +156,20 @@ _cd_func() {
 	fi
 
 	return 1
+}
+
+
+
+# Remove leading and trailing spaces.
+_trim_space() {
+	echo $*
+}
+
+
+
+_exit_trap() {
+#	cd "${OLD_DIR}"
+	_cd_func "${OLD_DIR}"
 }
 
 
@@ -259,7 +283,7 @@ fi
 HILITE="${BCyan}"
 
 echo ""
-echo -e "Install the cd ripper software from files in this directory for use with ${HILITE}'moOde'${Colour_Off}."
+echo -e "Install the radio station recording software for use with ${HILITE}'moOde'${Colour_Off}."
 
 if [ ! -f "/var/www/command/moode.php" ]; then
 	echo ""
@@ -267,7 +291,7 @@ if [ ! -f "/var/www/command/moode.php" ]; then
 	echo ""
 	echo -e "${BYellow}Aborted...${Colour_Off}"
 
-	exit 6
+	exit 1
 fi
 
 
@@ -279,40 +303,64 @@ OLD_DIR=$(pwd)
 _cd_func "${DIRECTORY}"
 
 # This should never happen.
-_check_command_and_exit_if_error "${?}" 7 "Cannot change directory to: ${DIRECTORY}"
+_check_command_and_exit_if_error "${?}" 2 "Cannot change directory to: ${DIRECTORY}"
 
 
 
 ##################################################################
-# Output some details.
+# Check for the command line arguments.
 ##################################################################
 
-if [[ "${*}" ]]; then
-	echo "args -> ${*}"
+_IP=$(_trim_space "${WEB_SERVER_IP}")
 
-	_exit_error 8 "Arguments are not required: ${*}"
+if [ 4 -ne "$#" ]; then
+	_exit_error 3 "
+You must enter exactly 4 command line arguments:
+
+Usage:\t\t${0}   Web-server-root-directory   Web-server-port   Recordings-Storage-Root-Directory   Recordings-Directory
+
+Example:\t${0} \"/home/pi\" 8088 \"/media/DA1A-71FE/Music\" \"Recordings\"
+
+This will create the web server at      : /home/pi/${RADIO_RECORDER_DIR}
+The recordings will be stored at        : /media/DA1A-71FE/Music/Recordings
+The radio station scheduler accessed at : ${_IP}:${WEB_SERVER_PORT}"
 fi
 
-echo ""
-echo "Ensure that the configuration file is correct for your requirements."
-echo ""
-echo -e "Reading the configuration file: ${HILITE}${DIRECTORY}/${CDRIP_CONFIG}${Colour_Off}"
-echo ""
-echo -e "Found CDROM drive:       ${HILITE}${CDROM}${Colour_Off}"
-echo ""
-echo -e "Music home path:         ${HILITE}${MUSIC_HOME_PATH}${Colour_Off}"		# Do not add any trailing slashes. Full path
-echo -e "Ripped music dir:        ${HILITE}${RIPPED_MUSIC_DIR}${Colour_Off}"		# Do not add any leading/trailing slashes
-echo -e "Ripped music sub dir:    ${HILITE}${MUSIC_SUB_DIR}${Colour_Off}"
-echo ""
-echo -e "Owner:                   ${HILITE}${RIPPED_MUSIC_OWNER}${Colour_Off}"		# WARNING: The owner existance is not checked
-echo -e "Saved playlist name:     ${HILITE}${DEFAULT_SAVED_USER_PLAYLIST}${DEFAULT_SAVED_USER_PLAYLIST_EXTENSION}${Colour_Off}"
-echo -e "Default volume:          ${HILITE}${DEFAULT_VOLUME}${Colour_Off}"		# Default 'moOde' volume
-echo -e "Library name in 'moOde': ${HILITE}${LIBRARY_TAG}${Colour_Off}"
-echo ""
-echo -e "Music storage path:      ${HILITE}${MUSIC_HOME_PATH}/${RIPPED_MUSIC_DIR}/${MUSIC_SUB_DIR}${Colour_Off}"
+
 
 ##################################################################
-#
+# Grab the command line arguments. There is no error checking.
+##################################################################
+
+WEB_SERVER_ROOT_DIR="$1"
+WEB_SERVER_PORT="$2"
+RECORDINGS_STORAGE_ROOT_DIR="$3"
+RECORDINGS_DIR="$4"
+
+
+
+##################################################################
+# Output some details for the user to manually check.
+##################################################################
+
+readonly	RADIO_RECORDER_WEB_SITE_DIR="${WEB_SERVER_ROOT_DIR}/${RADIO_RECORDER_DIR}"
+
+echo ""
+echo -e "Recordings storage directory:       ${HILITE}${RECORDINGS_STORAGE_ROOT_DIR}/${RECORDINGS_DIR}${Colour_Off}"
+echo ""
+echo -e "Radio scheduler web site directory: ${HILITE}${RADIO_RECORDER_WEB_SITE_DIR}${Colour_Off}"
+echo ""
+echo -e "Web server port:                    ${HILITE}${WEB_SERVER_PORT}${Colour_Off}"
+echo ""
+echo -e "Owner:                              ${HILITE}${OWNER}${Colour_Off}"	# WARNING: The owner existance is not checked
+echo ""
+echo -e "Library name in 'moOde':            ${HILITE}${RECORDINGS_DIR}${Colour_Off}"
+echo ""
+
+
+
+##################################################################
+# Allow a change of mind.
 ##################################################################
 
 # For some reason '_get_yes_no()' changes the working directory.
@@ -334,11 +382,20 @@ if [[ 0 -eq "${RV}" ]]; then
 	# No
 	echo -e "${BYellow}Aborted...${Colour_Off}"
 
-	exit 10
+	exit 4
 fi
 
 echo ""
 echo "-------------------------------------------------------------------------------------------------"
+echo ""
+
+
+
+##################################################################
+# Install our traps.
+##################################################################
+
+trap	_exit_trap	EXIT ERR SIGHUP SIGINT SIGQUIT SIGABRT SIGTERM
 
 
 
@@ -357,8 +414,7 @@ do
 
 	# If the command is not found, add it to the missing list to install later on.
 	if [ -z "${CMD_TO_CHECK}" ]; then
-			MISSING_PROGRAMS+=("${CMD}")
-		fi
+		MISSING_PROGRAMS+=("${CMD}")
 	fi
 done
 
@@ -368,13 +424,13 @@ if [[ -n "${MISSING_PROGRAMS[*]}" ]]; then
 
 	apt update
 
-	_check_command_and_exit_if_error "${?}" 15 "Apt package repository update failed."
+	_check_command_and_exit_if_error "${?}" 5 "Apt package repository update failed."
 
 	echo "Installing the missing programs."
 
 	apt install "${MISSING_PROGRAMS[@]}"
 
-	_check_command_and_exit_if_error "${?}" 16 "Installation of missing programs failed."
+	_check_command_and_exit_if_error "${?}" 6 "Installation of missing programs failed."
 fi
 
 _display_ok
@@ -387,6 +443,7 @@ _display_ok
 
 echo "Looking in '/etc/mpd.conf' for the music directory."
 
+# Usually /var/lib/mpd/music
 MPD_MUSIC_DIR=""
 
 # Read the file in row mode and extract each line.
@@ -410,12 +467,12 @@ while IFS= read -r LINE; do
 done < "/etc/mpd.conf"
 
 if [[ -z "${MPD_MUSIC_DIR}" ]]; then
-	_exit_error 17 "Cannot find 'music_directory' entry in '/etc/mpd.conf'"
+	_exit_error 7 "Cannot find 'music_directory' entry in '/etc/mpd.conf'"
 fi
 
 # If the directory does not exist.
 if [[ ! -d "${MPD_MUSIC_DIR}" ]]; then
-	_exit_error 18 "Cannot find directory: ${MPD_MUSIC_DIR}"
+	_exit_error 8 "Cannot find directory: ${MPD_MUSIC_DIR}"
 fi
 
 _display_ok
@@ -426,29 +483,89 @@ _display_ok
 # Create the web server directory if required.
 ##################################################################
 
-# /home/pi/Music-CD
-RADIORECORDER_DIR="RadioRecorder"
-
-WEB_SERVER_DIR="${MUSIC_HOME_PATH}/${RADIORECORDER_DIR}"
-
-echo "Checking for the web server directory: ${WEB_SERVER_DIR}"
+echo "Checking for the web server directory: ${RADIO_RECORDER_WEB_SITE_DIR}"
 
 # If the directory does not exist.
-if [[ ! -d "${WEB_SERVER_DIR}" ]]; then
-	echo "Creating the web server directory: ${WEB_SERVER_DIR}"
+if [[ ! -d "${RADIO_RECORDER_WEB_SITE_DIR}" ]]; then
+	echo "Creating the web server directory: ${RADIO_RECORDER_WEB_SITE_DIR}"
 
-	mkdir "${WEB_SERVER_DIR}"
+	mkdir "${RADIO_RECORDER_WEB_SITE_DIR}"
 
-	_check_command_and_exit_if_error "${?}" 19 "Cannot make directory: ${WEB_SERVER_DIR}"
-
-	chown "${RIPPED_MUSIC_OWNER}" "${WEB_SERVER_DIR}"
-
-	_check_command_and_exit_if_error "${?}" 20 "Cannot change owner for: ${WEB_SERVER_DIR}"
+	_check_command_and_exit_if_error "${?}" 9 "Cannot make directory: ${RADIO_RECORDER_WEB_SITE_DIR}"
 
 	# If the directory still does not exist.
-	if [[ ! -d "${WEB_SERVER_DIR}" ]]; then
-		_exit_error 25 "Cannot find directory: ${WEB_SERVER_DIR}"
+	if [[ ! -d "${RADIO_RECORDER_WEB_SITE_DIR}" ]]; then
+		_exit_error 11 "Cannot find directory: ${RADIO_RECORDER_WEB_SITE_DIR}"
 	fi
+
+	_display_ok
+
+
+
+	##################################################################
+	# Install the radio recorder web server files.
+	##################################################################
+
+	echo "Changing directory to: ${RADIO_RECORDER_WEB_SITE_DIR}"
+
+	# cd "${MPD_MUSIC_DIR}"
+	_cd_func "${RADIO_RECORDER_WEB_SITE_DIR}"
+
+	_check_command_and_exit_if_error "${?}" 12 "Cannot change directory to: ${RADIO_RECORDER_WEB_SITE_DIR}"
+
+	echo "Downloading the radio recorder gui file from: ${DOWNLOAD_RADIO_REC_WEB_GUI}"
+
+	wget "${DOWNLOAD_RADIO_REC_WEB_GUI}" -O "RadioRecorder.tar.gz"
+
+	_check_command_and_exit_if_error "${?}" 13 "Cannot download the file: ${DOWNLOAD_RADIO_REC_WEB_GUI}"
+
+	echo "Extracting the files:"
+
+	tar -x -f RadioRecorder.tar.gz
+
+	_check_command_and_exit_if_error "${?}" 14 "Cannot extract the file: RadioRecorder.tar.gz"
+
+	# Remove the downloaded file.
+
+	rm RadioRecorder.tar.gz
+
+	_display_ok
+
+
+
+	##################################################################
+	# Create the radio recorder settings file.
+	##################################################################
+
+	echo "Creating the radio recorder settings file: '${RADIO_RECORDER_WEB_SITE_DIR}/res/settings.php'"
+
+	echo "<?php
+
+class Settings {
+
+  public static $siteRoot = '${RADIO_RECORDER_WEB_SITE_DIR}';
+  public static $recordedFilesDestination = '${RECORDINGS_STORAGE_ROOT_DIR}/${RECORDINGS_DIR}/';
+  public static $language = 'en';					// Valid values are 'de', 'en', 'fr', 'sk'
+  public static $locale = 'C';						// Default is 'C'; other possible locales: 'de_AT.UTF-8' to enable all corresponding characters for the filename
+  public static $defaultStreamripperParams = '>/dev/null';		// Adds streamripper params to each call
+  public static $addDatePrefixToFilename = 'Y-m-d';			// Prefix format (e.g. 'Y-m-d') or null if no prefix to add
+  public static $postCommand = 'mpc update > /dev/null';		// Command to be executed after the recording is finished
+  public static $logThreshold = 1;					// Level of log messages, possible values : LEVEL_DEBUG=4, LEVEL_INFO=3, LEVEL_WARN=2, LEVEL_ERROR=1
+
+}
+
+?>" > res/settings.php
+
+	chown -R "${OWNER}" "${RADIO_RECORDER_WEB_SITE_DIR}"
+
+	_check_command_and_exit_if_error "${?}" 10 "Cannot change owner for: ${RADIO_RECORDER_WEB_SITE_DIR}"
+
+	_display_ok
+
+
+
+else
+	echo "The web server directory already exists. No changes have been made."
 fi
 
 _display_ok
@@ -456,7 +573,39 @@ _display_ok
 
 
 ##################################################################
-# Create a symbolic link to the mount point directory.
+# Create the recordings directory if required.
+##################################################################
+
+_RECORDINGS_DIR="${RECORDINGS_STORAGE_ROOT_DIR}/${RECORDINGS_DIR}"
+
+echo "Checking for the recordings directory: ${_RECORDINGS_DIR}"
+
+# If the directory does not exist.
+if [[ ! -d "${_RECORDINGS_DIR}" ]]; then
+	echo "Creating the recordings directory: ${_RECORDINGS_DIR}"
+
+	mkdir "${_RECORDINGS_DIR}"
+
+	_check_command_and_exit_if_error "${?}" 9 "Cannot make directory: ${_RECORDINGS_DIR}"
+
+	chown "${OWNER}" "${_RECORDINGS_DIR}"
+
+	_check_command_and_exit_if_error "${?}" 10 "Cannot change owner for: ${_RECORDINGS_DIR}"
+
+	# If the directory still does not exist.
+	if [[ ! -d "${_RECORDINGS_DIR}" ]]; then
+		_exit_error 11 "Cannot find directory: ${_RECORDINGS_DIR}"
+	fi
+else
+	echo "The recordings directory already exists. No changes have been made."
+fi
+
+_display_ok
+
+
+
+##################################################################
+# Create a symbolic link to the recordings directory.
 ##################################################################
 
 # /var/lib/mpd/music
@@ -465,21 +614,47 @@ echo "Changing directory to: ${MPD_MUSIC_DIR}"
 # cd "${MPD_MUSIC_DIR}"
 _cd_func "${MPD_MUSIC_DIR}"
 
-_check_command_and_exit_if_error "${?}" 32 "Cannot change directory to: ${MPD_MUSIC_DIR}"
+_check_command_and_exit_if_error "${?}" 15 "Cannot change directory to: ${MPD_MUSIC_DIR}"
 
-echo "Checking for link: ${LIBRARY_TAG} to: ${MNT_CD}"
+echo "Checking for link: ${RECORDINGS_DIR} to: ${RECORDINGS_STORAGE_ROOT_DIR}/${RECORDINGS_DIR}"
 
-# /mnt/${MUSIC_MNT_SOURCE}
-# /mnt/CD
-#
+# RECORDINGS_STORAGE_ROOT_DIR="/home/pi"
+# RECORDINGS_DIR="Recordings"
+
+# "${RECORDINGS_STORAGE_ROOT_DIR}/${RECORDINGS_DIR}"
+
 # If the symbolic link does not exist.
 #if [[ ! -h "${LIBRARY_TAG}" ]]; then
-if [[ ! -L "${LIBRARY_TAG}" ]]; then
-	echo "Creating link: '${LIBRARY_TAG}' to: '${MNT_CD}'"
+if [[ ! -L "${RECORDINGS_DIR}" ]]; then
+	echo "Creating link: '${RECORDINGS_DIR}' to: '${RECORDINGS_STORAGE_ROOT_DIR}/${RECORDINGS_DIR}'"
 
-	ln -s "${MNT_CD}" "${LIBRARY_TAG}"
+	ln -s "${RECORDINGS_STORAGE_ROOT_DIR}/${RECORDINGS_DIR}" "${RECORDINGS_DIR}"
 
-	_check_command_and_exit_if_error "${?}" 33 "Cannot create link to: ${MNT_CD}"
+	_check_command_and_exit_if_error "${?}" 16 "Cannot create link to: ${RECORDINGS_STORAGE_ROOT_DIR}/${RECORDINGS_DIR}"
+else
+	echo "The link already exists. No changes have been made."
+fi
+
+echo "The link will appear in the moOde library panel as: '${RECORDINGS_DIR}'"
+
+_display_ok
+
+
+
+##################################################################
+# Check for access to the recordings directory.
+##################################################################
+
+# If the directory where the recorded files will be stored cannot be accessed.
+
+# /var/lib/mpd/music/Recordings
+readonly	ACCESS_RECORDINGS_DIR="${MPD_MUSIC_DIR}/${RECORDINGS_DIR}"
+
+echo "Checking for access to: ${ACCESS_RECORDINGS_DIR}"
+
+# /var/lib/mpd/music/Recordings
+if [[ ! -d "${ACCESS_RECORDINGS_DIR}" ]]; then
+	_exit_error 17 "Cannot find directory: ${ACCESS_RECORDINGS_DIR}"
 fi
 
 _display_ok
@@ -487,35 +662,52 @@ _display_ok
 
 
 ##################################################################
-# Check for access to the music directory.
+# Tell mpd about the new recordings directory.
 ##################################################################
 
-# If the directory where the ripped CD files will be stored cannot be accessed.
+echo "Updating mpd with the recordings directory: ${RECORDINGS_DIR}"
 
-# /var/lib/mpd/music/CD
-RIPPING_DIR="${MPD_MUSIC_DIR}/${LIBRARY_TAG}"
+mpc update > /dev/null
 
-echo "Checking for: ${RIPPING_DIR}"
-
-# /var/lib/mpd/music/CD
-if [[ ! -d "${RIPPING_DIR}" ]]; then
-	_exit_error 34 "Cannot find directory: ${RIPPING_DIR}"
-fi
+_check_command_and_exit_if_error "${?}" 18 "Cannot get mpd to update the music directory: ${RECORDINGS_DIR}"
 
 _display_ok
 
 
 
 ##################################################################
-# Tell mpd about the new cd music directory.
+# Add the web server start up command to '/etc/rc.local'.
 ##################################################################
 
-echo "Updating mpd with the new music directory: ${LIBRARY_TAG}"
-echo ""
+echo "Checking for the web server start up command in: '/etc/rc.local'"
 
-mpc update
+grep -q "/usr/bin/php" "/etc/rc.local"
 
-_check_command_and_exit_if_error "${?}" 44 "Cannot get mpd to update the music directory: ${LIBRARY_TAG}"
+RV="${?}"
+
+if [ 0 -ne ${RV} ]; then
+	echo "Adding the web server start up command to: '/etc/rc.local'"
+
+	# At the bottom and just before the last  'exit 0' statement add the following:
+
+	sed -e '$s/*exit.*/# Start the radio recorder web server.\n/usr/bin/php -q -S ${_IP}:${WEB_SERVER_PORT} -t ${RADIO_RECORDER_WEB_SITE_DIR} >/dev/null 2>&1\n&/' "/etc/rc.local"
+
+	#sed 's/.*exit.*/# Start the radio recorder web server.\n/usr/bin/php -q -S ${_IP}:${WEB_SERVER_PORT} -t ${RADIO_RECORDER_WEB_SITE_DIR} >/dev/null 2>&1\n&/' "/etc/rc.local"
+
+	_check_command_and_exit_if_error "${?}" 19 "Cannot add the web server start up command in: '/etc/rc.local'"
+
+	_display_ok
+else
+	echo "The web server start up command has already been added to: '/etc/rc.local'"
+fi
+
+
+
+##################################################################
+# Remove our traps.
+##################################################################
+
+trap	-	EXIT ERR SIGHUP SIGINT SIGQUIT SIGABRT SIGTERM
 
 
 
@@ -524,41 +716,37 @@ _check_command_and_exit_if_error "${?}" 44 "Cannot get mpd to update the music d
 ##################################################################
 
 echo ""
-echo -e "${Black}${On_Green}SUCCESS:${Colour_Off} CD ripper/player for ${HILITE}'moOde'${Colour_Off} installed ok."
-echo -e "${HILITE}'moOde'${Colour_Off} can be accessed on ip address: ${HILITE}$(hostname -I)${Colour_Off}"
-
-exit 0
-
-
-
-
-
+echo -e "${Black}${On_Green}SUCCESS:${Colour_Off} The radio station recorder for ${HILITE}'moOde'${Colour_Off} has been installed ok."
+echo ""
+echo -e "The radio station recorder can be accessed on: ${HILITE}${_IP}:${WEB_SERVER_PORT}${Colour_Off}"
+echo ""
 
 
 
 ##################################################################
+# Allow the importing of the moOde radio staions that are mp3 based.
+##################################################################
+
+# For some reason '_get_yes_no()' changes the working directory.
+# In fact, any function call will changes the working directory.
+# WHY? WHY? WHY? WHY? WHY?
+#
+# This is a hack...
+pushd "." > /dev/null				# Save the current directory on the stack and change to "."
+
+# Returns 1 if YES else 0 if NO.
+_get_yes_no "Import ${HILITE}'moOde'${BWhite} mp3 radio stations"
+
+RV="${?}"
+
+# This is a hack...
+popd > /dev/null				# Restore the save directory from the stack.
+
+if [[ 1 -eq "${RV}" ]]; then
+	# Yes
+	Import-MoOde-Radio-Stations.sh
+fi
 
 
-Make a directory for the radio recorder in the pi home directory.
 
-	mkdir RadioRecorder
-
-	cd RadioRecorder
-
-Download the files:
-
-	wget https://sourceforge.net/projects/radiorecwebgui/files/latest/download -O RadioRecorder.tar.gz
-
-Extract:
-	tar -x -f RadioRecorder.tar.gz
-
-Remove the downloaded file:
-	rm RadioRecorder.tar.gz
-
-Get the full working directory of the radio recorder and note this for the next step:
-
-	pwd
-
-Configure the radio recorder:
-
-	nano res/settings.php
+exit 0

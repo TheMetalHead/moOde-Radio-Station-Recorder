@@ -317,7 +317,7 @@ if [ 4 -ne "$#" ]; then
 	_exit_error 3 "
 You must enter exactly 4 command line arguments:
 
-Usage:\t\t${0}   Web-server-root-directory   Web-server-port   Recordings-Storage-Root-Directory   Recordings-Directory
+Usage:\t\t${0}   Full-Path-To-Web-Server-Root-Directory   Web-Server-Port   Full-Path-To-Recordings-Storage-Root-Directory   Recordings-Directory
 
 Example:\t${0} \"/home/pi\" 8088 \"/media/DA1A-71FE/Music\" \"Recordings\"
 
@@ -723,29 +723,10 @@ echo ""
 
 
 
-##################################################################
-# Allow the importing of the moOde radio staions that are mp3 based.
-##################################################################
+# Change back to the directory where this script is located.
+_cd_func "${DIRECTORY}"
 
-# For some reason '_get_yes_no()' changes the working directory.
-# In fact, any function call will changes the working directory.
-# WHY? WHY? WHY? WHY? WHY?
-#
-# This is a hack...
-pushd "." > /dev/null				# Save the current directory on the stack and change to "."
-
-# Returns 1 if YES else 0 if NO.
-_get_yes_no "Import ${HILITE}'moOde'${BWhite} mp3 radio stations"
-
-RV="${?}"
-
-# This is a hack...
-popd > /dev/null				# Restore the save directory from the stack.
-
-if [[ 1 -eq "${RV}" ]]; then
-	# Yes
-	Import-MoOde-Radio-Stations.sh "${RADIO_RECORDER_WEB_SITE_DIR}"
-fi
+"${DIRECTORY}"/Import-MoOde-Radio-Stations.sh "${RADIO_RECORDER_WEB_SITE_DIR}"
 
 
 

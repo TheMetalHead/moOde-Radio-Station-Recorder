@@ -8,10 +8,6 @@ source	"read_ini.sh"
 
 
 
-readonly	RADIORECORDER_DIR="RadioRecorder"
-
-readonly	RADIO_STREAMS="${RADIORECORDER_DIR}/res/streams.txt"
-
 ##################################################################
 # Colour constants.
 ##################################################################
@@ -153,12 +149,24 @@ _get_yes_no() {
 
 
 ##################################################################
-# Check to see if we are in the correct location.
+# Check for the web server root command line argument.
 ##################################################################
+
+if [ 1 -ne "$#" ]; then
+	_exit_error 1 "\nMust have the location of the radio recorder web root.\n\teg   ${0} /home/pi/RadioRecorder"
+fi
+
+
+
+##################################################################
+# Check to see if we can find the web server files.
+##################################################################
+
+readonly	RADIORECORDER_DIR="${1}"
 
 # If the directory does not exist.
 if [[ ! -d "${RADIORECORDER_DIR}" ]]; then
-	_exit_error 1 "Cannot find directory: ${RADIORECORDER_DIR}"
+	_exit_error 2 "Cannot find directory: ${RADIORECORDER_DIR}"
 fi
 
 
@@ -186,7 +194,7 @@ if [[ 0 -eq "${RV}" ]]; then
 	# No
 	echo -e "${BYellow}Aborted...${Colour_Off}"
 
-	exit 10
+	exit 3
 fi
 
 echo ""
@@ -225,18 +233,25 @@ while IFS= read -r LINE; do
 done < "/etc/mpd.conf"
 
 if [[ -z "${MPD_MUSIC_DIR}" ]]; then
-	_exit_error 2 "Cannot find 'music_directory' entry in '/etc/mpd.conf'"
+	_exit_error 4 "Cannot find 'music_directory' entry in '/etc/mpd.conf'"
 fi
 
 # If the directory does not exist.
 if [[ ! -d "${MPD_MUSIC_DIR}" ]]; then
-	_exit_error 3 "Cannot find directory: ${MPD_MUSIC_DIR}"
+	_exit_error 5 "Cannot find directory: ${MPD_MUSIC_DIR}"
 fi
 
 _display_ok
 
 
 
+##################################################################
+# Import moOdes radio stations.
+##################################################################
+
+readonly	RADIO_STREAMS="${RADIORECORDER_DIR}/res/streams.txt"
+
+# Ensure we can write to the file.
 chmod 755 "${RADIO_STREAMS}"
 
 echo "// Lines with starting '//' are not interpreted
@@ -279,9 +294,9 @@ for STATION in "${MPD_MUSIC_DIR}/RADIO/"*.pls; do
 			echo ""
 
 			# Places the recording in the 'Recordings' directory as '${INI__playlist__Title1"} - 2020_06_26_22_11_00.mp3'.
-			echo "${INI__playlist__Title1} - One track;${INI__playlist__File1};-u \"FreeAmp\/2.x\" -A -a \"%S - %d\" -k 0 -o always" >> "${RADIO_STREAMS}"
+			echo "${INI__playlist__Title1} - One track;${INI__playlist__File1};-u \"FreeAmp/2.x\" -A -a \"%S - %d\" -k 0 -o always" >> "${RADIO_STREAMS}"
 
-			echo "${INI__playlist__Title1} - Rip tracks;${INI__playlist__File1};-u \"FreeAmp\/2.x\" -D \"%A - %T\" -k 0 -o always" >> "${RADIO_STREAMS}"
+			echo "${INI__playlist__Title1} - Rip tracks;${INI__playlist__File1};-u \"FreeAmp/2.x\" -D \"%A - %T\" -k 0 -o always" >> "${RADIO_STREAMS}"
 		fi
 	fi
 done

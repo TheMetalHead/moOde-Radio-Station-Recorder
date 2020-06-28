@@ -291,12 +291,17 @@ for STATION in "${MPD_MUSIC_DIR}/RADIO/"*.pls; do
 		if [ -n "$INI__playlist__File1" ]; then
 			echo "Title: $INI__playlist__Title1"
 			echo "Stream: $INI__playlist__File1"
+
+			if [[ "$INI__playlist__File1" == *.m3u8 ]]; then
+				echo -e "\tIgnoring because cannot record from .m3u8 streams."
+			else
+				# Places the recording in the 'Recordings' directory as '${INI__playlist__Title1"} - 2020_06_26_22_11_00.mp3'.
+				echo "${INI__playlist__Title1} - One track;${INI__playlist__File1};-u \"FreeAmp/2.x\" -A -a \"%S - %d\" -k 0 -o always" >> "${RADIO_STREAMS}"
+
+				echo "${INI__playlist__Title1} - Rip tracks;${INI__playlist__File1};-u \"FreeAmp/2.x\" -D \"%A - %T\" -k 0 -o always" >> "${RADIO_STREAMS}"
+			fi
+
 			echo ""
-
-			# Places the recording in the 'Recordings' directory as '${INI__playlist__Title1"} - 2020_06_26_22_11_00.mp3'.
-			echo "${INI__playlist__Title1} - One track;${INI__playlist__File1};-u \"FreeAmp/2.x\" -A -a \"%S - %d\" -k 0 -o always" >> "${RADIO_STREAMS}"
-
-			echo "${INI__playlist__Title1} - Rip tracks;${INI__playlist__File1};-u \"FreeAmp/2.x\" -D \"%A - %T\" -k 0 -o always" >> "${RADIO_STREAMS}"
 		fi
 	fi
 done

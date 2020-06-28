@@ -8,6 +8,7 @@ The following stream formats are supported by the stream ripper: mp3, nsv, aac, 
 
 The streamripper and radiorecorder software have been written by other people. Their links are given at the bottom.
 
+There is a companion program called 'Import-MoOde-Radio-Stations.sh' that will import all stations into the radio recorder for you. This creates two entries per station. One to record it as one whole track, the other splits the recorded station into individual tracks.
 
 As always, before installing I recommend that a backup is made of your moOde system. I will not be held responsible for any mistakes. That way if you do not like what you see, you can always go back to your old set up.
 

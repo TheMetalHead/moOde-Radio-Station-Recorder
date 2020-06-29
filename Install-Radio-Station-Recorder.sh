@@ -681,9 +681,13 @@ _display_ok
 
 echo "Checking for the web server start up command in: '/etc/rc.local'"
 
-grep -q "/usr/bin/php" "/etc/rc.local"
+# This allows multiple instances of the php web server on different ports.
+grep -q "/usr/bin/php\ -q\ -S\ ${_IP}:${WEB_SERVER_PORT}\ -t" "/etc/rc.local"
 
 RV="${?}"
+
+# 0 = Found.
+# 1 = Not found.
 
 if [ 0 -ne ${RV} ]; then
 	echo "Adding the web server start up command to: '/etc/rc.local'"

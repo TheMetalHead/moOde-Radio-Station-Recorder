@@ -262,7 +262,7 @@ Lines without a semicolon will be ignored, too
 // Radiorecorder will not check for this. Illegal streams will cause an error
 // at the sheduled starttime. This error will not be displayed in any Radiorecorder log
 // or on the web interface!
-// it is also possible to add streamripper parameter to a specific station
+// it is also possible to add streamripper parameter to a specific station" > "${RADIO_STREAMS}"
 
 for STATION in "${MPD_MUSIC_DIR}/RADIO/"*.pls; do
 	echo "Importing: ${STATION}"		# Zen FM.pls

@@ -564,14 +564,14 @@ if [[ ! -d "${RADIO_RECORDER_WEB_SITE_DIR}" ]]; then
 
 class Settings {
 
-  public static $siteRoot = '${RADIO_RECORDER_WEB_SITE_DIR}';
-  public static $recordedFilesDestination = '${RECORDINGS_STORAGE_ROOT_DIR}/${RECORDINGS_DIR}/';
-  public static $language = 'en';					// Valid values are 'de', 'en', 'fr', 'sk'
-  public static $locale = 'C';						// Default is 'C'; other possible locales: 'de_AT.UTF-8' to enable all corresponding characters for the filename
-  public static $defaultStreamripperParams = '>/dev/null';		// Adds streamripper params to each call
-  public static $addDatePrefixToFilename = 'Y-m-d';			// Prefix format (e.g. 'Y-m-d') or null if no prefix to add
-  public static $postCommand = 'mpc update > /dev/null';		// Command to be executed after the recording is finished
-  public static $logThreshold = 1;					// Level of log messages, possible values : LEVEL_DEBUG=4, LEVEL_INFO=3, LEVEL_WARN=2, LEVEL_ERROR=1
+  public static \$siteRoot = '${RADIO_RECORDER_WEB_SITE_DIR}';
+  public static \$recordedFilesDestination = '${RECORDINGS_STORAGE_ROOT_DIR}/${RECORDINGS_DIR}/';
+  public static \$language = 'en';					// Valid values are 'de', 'en', 'fr', 'sk'
+  public static \$locale = 'C';						// Default is 'C'; other possible locales: 'de_AT.UTF-8' to enable all corresponding characters for the filename
+  public static \$defaultStreamripperParams = '>/dev/null';		// Adds streamripper params to each call
+  public static \$addDatePrefixToFilename = 'Y-m-d';			// Prefix format (e.g. 'Y-m-d') or null if no prefix to add
+  public static \$postCommand = 'mpc update > /dev/null';		// Command to be executed after the recording is finished
+  public static \$logThreshold = 1;					// Level of log messages, possible values : LEVEL_DEBUG=4, LEVEL_INFO=3, LEVEL_WARN=2, LEVEL_ERROR=1
 
 }
 

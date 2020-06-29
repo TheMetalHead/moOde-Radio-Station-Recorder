@@ -323,7 +323,7 @@ Example:\t${0} \"/home/pi\" 8088 \"/media/DA1A-71FE/Music\" \"Recordings\"
 
 This will create the web server at      : /home/pi/${RADIO_RECORDER_DIR}
 The recordings will be stored at        : /media/DA1A-71FE/Music/Recordings
-The radio station scheduler accessed at : ${_IP}:${WEB_SERVER_PORT}"
+The radio station scheduler accessed at : ${_IP}:8088"
 fi
 
 
@@ -396,6 +396,27 @@ echo ""
 ##################################################################
 
 trap	_exit_trap	EXIT ERR SIGHUP SIGINT SIGQUIT SIGABRT SIGTERM
+
+
+
+##################################################################
+# Check if the web server port is free.
+##################################################################
+
+echo "Checking if the web server port is free."
+
+nc -z "${_IP}" "${WEB_SERVER_PORT}" > /dev/null
+
+RV="${?}"
+
+# 0 = Not free.
+# 1 = Free.
+
+if [ 0 -eq ${RV} ]; then
+	_exit_error 5 "The web server port (${WEB_SERVER_PORT}) is already being used: '/etc/rc.local'"
+fi
+
+_display_ok
 
 
 
@@ -508,7 +529,7 @@ if [[ ! -d "${RADIO_RECORDER_WEB_SITE_DIR}" ]]; then
 
 	echo "Changing directory to: ${RADIO_RECORDER_WEB_SITE_DIR}"
 
-	# cd "${MPD_MUSIC_DIR}"
+	# cd "${RADIO_RECORDER_WEB_SITE_DIR}"
 	_cd_func "${RADIO_RECORDER_WEB_SITE_DIR}"
 
 	_check_command_and_exit_if_error "${?}" 12 "Cannot change directory to: ${RADIO_RECORDER_WEB_SITE_DIR}"

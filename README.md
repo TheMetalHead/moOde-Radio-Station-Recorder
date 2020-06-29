@@ -4,101 +4,29 @@ Instructions for a simple radio station recorder for moOde http://moodeaudio.org
 
 It consists of a separate web server to schedule the recording of a radio station. This then updates moOde/mpd with the new recordings that appear in a directory called Recordings in the library. This has been tried on moOde versions 6.4.2 and 6.5.2
 
-The following stream formats are supported by the stream ripper: mp3, nsv, aac, and ogg. I have only tried two formats, mp3 is ok, aac had audio interruptions.
+The following stream formats are supported by the stream ripper: mp3, nsv, aac, and ogg. I have only tried two formats, mp3 is ok, aac had audio interruptions. m3u8 streams are not supported.
 
 The streamripper and radiorecorder software have been written by other people. Their links are given at the bottom.
 
 There is a companion program called 'Import-MoOde-Radio-Stations.sh' that will import all stations into the radio recorder for you. This creates two entries per station. One to record it as one whole track, the other splits the recorded station into individual tracks. m3u8 streams are not supported and are filtered out.
 
-As always, before installing I recommend that a backup is made of your moOde system. I will not be held responsible for any mistakes. That way if you do not like what you see, you can always go back to your old set up.
+# Installing:
+
+As always, before installing it is recommend that a backup is made of your moOde system. I will not be held responsible for any mistakes. That way if you do not like what you see, you can always go back to your old set up.
 
 Drop into the command line in moOde using ssh. Use Putty or moOde Shellinabox.
 
-Install the dependencies:
+    git clone https://github.com/TheMetalHead/moOde-Radio-Station-Recorder.git
+    cd moOde-Radio-Station-Recorder
+    chmod 500 *.sh
 
-    sudo apt update
-    sudo apt install streamripper at
+To install into the home directory /home/pi/RadioRecorder using the recording directory of /media/DA1A-71FE/Recordings with the web server port of 8080 use:
 
-Make a directory for the radio recorder in the pi home directory.
-
-    mkdir RadioRecorder
-
-    cd RadioRecorder
-
-Download the file:
-
-    wget https://sourceforge.net/projects/radiore...t/download -O RadioRecorder.tar.gz
-
-Extract:
-
-    tar -x -f RadioRecorder.tar.gz
-
-Remove the downloaded file:
-
-    rm RadioRecorder.tar.gz
-
-Get the full working directory of the radio recorder and note this for the next step:
-
-    pwd
-
-Configure the radio recorder:
-
-    nano res/settings.php
-
-Change the following for your preferences:
-
-    The full working directory of the radio recorder from 'pwd' in the previous step:
-        $siteRoot = '/home/pi/RadioRecorder';
-
-    The location of where to store the recordings. This will be different to your system. eg:
-        $recordedFilesDestination = '/home/pi/Music/Recordings';
-
-    Adds additional streamripper parameters to each call. This disables writing the stdout output to mail.
-        $defaultStreamripperParams = '>/dev/null';
-
-    Change the recording prefix from null to year, month, day:
-        $addDatePrefixToFilename = 'Y-m-d';
-
-    Command to be executed after the recording is finished. Here we just update mpd:
-        $postCommand = 'mpc update > /dev/null';
-
-    Change the log level to ERROR:
-        $logThreshold = 1;
-
-Exit nano.
-
-
-
-Make a directory for the recordings in a suitable location. This will be used as the name that will appear in the moOde library panel:
-
-eg
-    cd /home/pi/Music
-
-    mkdir Recordings
-
-Create a link for moOde to the new recordings directory:
-
-    cd /var/lib/mpd/music
-
-Create the link:
-
-    sudo ln -s /home/pi/Music/Recordings
-
-The link will appear in the moOde library panel as 'Recordings'.
-
-Create a simple web server. Note this is not production grade and should not be visible on the internet:
-
-    sudo nano /etc/rc.local
-
-At the bottom and just before the 'exit 0' statement add the following:
-
-    /usr/bin/php -q -S 192.168.1.123:8080 -t /home/pi/RadioRecorder >/dev/null 2>&1
-
-Note: Change the ip address to your moOde ip address and ensure that the port is above 1024. In this case 8080.
+    ./Install-Radio-Station-Recorder.sh ~ 8080 /media/DA1A-71FE Recordings
 
 Reboot moOde.
 
-
+# Usage:
 
 Access the web interface using:
 
@@ -180,8 +108,7 @@ Create the schedule:
 'Additional Parameter' options:
 
 -D %d
-# Name files with date and time (per exec)
-# If -D is used, the options -s and -P will be ignored.
+Name files with date and time (per exec). If -D is used, the options -s and -P will be ignored.
 
     %S        Stream
     %A        Artist
@@ -194,30 +121,24 @@ Create the schedule:
     %%        Percent sign
 
 -a [pattern]
-# Sometimes you want the stream recorded to a single (big) file
-  without splitting into tracks. The -a option does this. If you use -a without
-  including the [pattern], a timestamped filename will automatically be used.
+  Sometimes you want the stream recorded to a single (big) file without splitting into tracks. The -a option does this. If you use -a without including the [pattern], a timestamped filename will automatically be used.
 
 -A
-Don´t create individual tracks.
-The default mode of operation is to create one file for each track.
-But sometimes you don´t want these files.
-Using the -A option, the individual files for each track are not created.
+Don´t create individual tracks. The default mode of operation is to create one file for each track. But sometimes you don´t want these files. Using the -A option, the individual files for each track are not created.
 
 -u "FreeAmp/2.x"
-# Some stream-servers will not accept the default Streamripper UserAgent,
-  the solution is using this parameter with the value "FreeAmp/2.x".
+  Some stream-servers will not accept the default Streamripper UserAgent, the solution is using this parameter with the value "FreeAmp/2.x".
 
 
 
-To access the saved recordings via moOde:
+# To access the saved recordings via moOde:
 
     Go to the library panel.
     Select Recordings.
 
 
 
-Additional info:
+# Additional info:
 
     https://sourceforge.net/projects/radiorecwebgui/
     http://streamripper.sourceforge.net/faq.php

@@ -400,6 +400,29 @@ trap	_exit_trap	EXIT ERR SIGHUP SIGINT SIGQUIT SIGABRT SIGTERM
 
 
 ##################################################################
+# We can only have one instance of the php web server.
+##################################################################
+
+RC_LOCAL_FILE="/etc/rc.local"
+
+echo "Checking if the php web server is free in: '${RC_LOCAL_FILE}'"
+
+grep -q "/usr/bin/php" "${RC_LOCAL_FILE}"
+
+RV="${?}"
+
+# 0 = Found.
+# 1 = Not found.
+
+if [ 0 -eq ${RV} ]; then
+	_exit_error 5 "The php web server is already being used: '${RC_LOCAL_FILE}'"
+fi
+
+_display_ok
+
+
+
+##################################################################
 # Check if the web server port is free.
 ##################################################################
 
@@ -413,7 +436,7 @@ RV="${?}"
 # 1 = Free.
 
 if [ 0 -eq ${RV} ]; then
-	_exit_error 5 "The web server port (${WEB_SERVER_PORT}) is already being used: '/etc/rc.local'"
+	_exit_error 6 "The web server port (${WEB_SERVER_PORT}) is already being used: '${RC_LOCAL_FILE}'"
 fi
 
 _display_ok
@@ -445,13 +468,13 @@ if [[ -n "${MISSING_PROGRAMS[*]}" ]]; then
 
 	apt update
 
-	_check_command_and_exit_if_error "${?}" 5 "Apt package repository update failed."
+	_check_command_and_exit_if_error "${?}" 7 "Apt package repository update failed."
 
 	echo "Installing the missing programs."
 
 	apt install "${MISSING_PROGRAMS[@]}"
 
-	_check_command_and_exit_if_error "${?}" 6 "Installation of missing programs failed."
+	_check_command_and_exit_if_error "${?}" 8 "Installation of missing programs failed."
 fi
 
 _display_ok
@@ -488,12 +511,12 @@ while IFS= read -r LINE; do
 done < "/etc/mpd.conf"
 
 if [[ -z "${MPD_MUSIC_DIR}" ]]; then
-	_exit_error 7 "Cannot find 'music_directory' entry in '/etc/mpd.conf'"
+	_exit_error 9 "Cannot find 'music_directory' entry in '/etc/mpd.conf'"
 fi
 
 # If the directory does not exist.
 if [[ ! -d "${MPD_MUSIC_DIR}" ]]; then
-	_exit_error 8 "Cannot find directory: ${MPD_MUSIC_DIR}"
+	_exit_error 10 "Cannot find directory: ${MPD_MUSIC_DIR}"
 fi
 
 _display_ok
@@ -512,11 +535,11 @@ if [[ ! -d "${RADIO_RECORDER_WEB_SITE_DIR}" ]]; then
 
 	mkdir "${RADIO_RECORDER_WEB_SITE_DIR}"
 
-	_check_command_and_exit_if_error "${?}" 9 "Cannot make directory: ${RADIO_RECORDER_WEB_SITE_DIR}"
+	_check_command_and_exit_if_error "${?}" 11 "Cannot make directory: ${RADIO_RECORDER_WEB_SITE_DIR}"
 
 	# If the directory still does not exist.
 	if [[ ! -d "${RADIO_RECORDER_WEB_SITE_DIR}" ]]; then
-		_exit_error 11 "Cannot find directory: ${RADIO_RECORDER_WEB_SITE_DIR}"
+		_exit_error 12 "Cannot find directory: ${RADIO_RECORDER_WEB_SITE_DIR}"
 	fi
 
 	_display_ok
@@ -532,19 +555,19 @@ if [[ ! -d "${RADIO_RECORDER_WEB_SITE_DIR}" ]]; then
 	# cd "${RADIO_RECORDER_WEB_SITE_DIR}"
 	_cd_func "${RADIO_RECORDER_WEB_SITE_DIR}"
 
-	_check_command_and_exit_if_error "${?}" 12 "Cannot change directory to: ${RADIO_RECORDER_WEB_SITE_DIR}"
+	_check_command_and_exit_if_error "${?}" 13 "Cannot change directory to: ${RADIO_RECORDER_WEB_SITE_DIR}"
 
 	echo "Downloading the radio recorder gui file from: ${DOWNLOAD_RADIO_REC_WEB_GUI}"
 
 	wget "${DOWNLOAD_RADIO_REC_WEB_GUI}" -O "RadioRecorder.tar.gz"
 
-	_check_command_and_exit_if_error "${?}" 13 "Cannot download the file: ${DOWNLOAD_RADIO_REC_WEB_GUI}"
+	_check_command_and_exit_if_error "${?}" 14 "Cannot download the file: ${DOWNLOAD_RADIO_REC_WEB_GUI}"
 
 	echo "Extracting the files:"
 
 	tar -x -f RadioRecorder.tar.gz
 
-	_check_command_and_exit_if_error "${?}" 14 "Cannot extract the file: RadioRecorder.tar.gz"
+	_check_command_and_exit_if_error "${?}" 15 "Cannot extract the file: RadioRecorder.tar.gz"
 
 	# Remove the downloaded file.
 
@@ -579,7 +602,7 @@ class Settings {
 
 	chown -R "${OWNER}" "${RADIO_RECORDER_WEB_SITE_DIR}"
 
-	_check_command_and_exit_if_error "${?}" 10 "Cannot change owner for: ${RADIO_RECORDER_WEB_SITE_DIR}"
+	_check_command_and_exit_if_error "${?}" 16 "Cannot change owner for: ${RADIO_RECORDER_WEB_SITE_DIR}"
 
 	_display_ok
 
@@ -587,6 +610,19 @@ class Settings {
 
 else
 	echo "The web server directory already exists. No changes have been made."
+fi
+
+
+
+##################################################################
+# Checking if the recordings storage root directory can be accessed.
+##################################################################
+
+echo "Checking for access to the recordings storage root directory: ${RECORDINGS_STORAGE_ROOT_DIR}"
+
+# If the directory does not exist.
+if [[ ! -d "${RECORDINGS_STORAGE_ROOT_DIR}" ]]; then
+		_exit_error 17 "Cannot find directory: ${RECORDINGS_STORAGE_ROOT_DIR}"
 fi
 
 _display_ok
@@ -599,7 +635,7 @@ _display_ok
 
 _RECORDINGS_DIR="${RECORDINGS_STORAGE_ROOT_DIR}/${RECORDINGS_DIR}"
 
-echo "Checking for the recordings directory: ${_RECORDINGS_DIR}"
+echo "Checking for access to the recordings directory: ${_RECORDINGS_DIR}"
 
 # If the directory does not exist.
 if [[ ! -d "${_RECORDINGS_DIR}" ]]; then
@@ -607,15 +643,15 @@ if [[ ! -d "${_RECORDINGS_DIR}" ]]; then
 
 	mkdir "${_RECORDINGS_DIR}"
 
-	_check_command_and_exit_if_error "${?}" 9 "Cannot make directory: ${_RECORDINGS_DIR}"
+	_check_command_and_exit_if_error "${?}" 18 "Cannot make directory: ${_RECORDINGS_DIR}"
 
 	chown "${OWNER}" "${_RECORDINGS_DIR}"
 
-	_check_command_and_exit_if_error "${?}" 10 "Cannot change owner for: ${_RECORDINGS_DIR}"
+	_check_command_and_exit_if_error "${?}" 19 "Cannot change owner for: ${_RECORDINGS_DIR}"
 
 	# If the directory still does not exist.
 	if [[ ! -d "${_RECORDINGS_DIR}" ]]; then
-		_exit_error 11 "Cannot find directory: ${_RECORDINGS_DIR}"
+		_exit_error 20 "Cannot find directory: ${_RECORDINGS_DIR}"
 	fi
 else
 	echo "The recordings directory already exists. No changes have been made."
@@ -635,7 +671,7 @@ echo "Changing directory to: ${MPD_MUSIC_DIR}"
 # cd "${MPD_MUSIC_DIR}"
 _cd_func "${MPD_MUSIC_DIR}"
 
-_check_command_and_exit_if_error "${?}" 15 "Cannot change directory to: ${MPD_MUSIC_DIR}"
+_check_command_and_exit_if_error "${?}" 21 "Cannot change directory to: ${MPD_MUSIC_DIR}"
 
 echo "Checking for link: ${RECORDINGS_DIR} to: ${RECORDINGS_STORAGE_ROOT_DIR}/${RECORDINGS_DIR}"
 
@@ -651,7 +687,7 @@ if [[ ! -L "${RECORDINGS_DIR}" ]]; then
 
 	ln -s "${RECORDINGS_STORAGE_ROOT_DIR}/${RECORDINGS_DIR}" "${RECORDINGS_DIR}"
 
-	_check_command_and_exit_if_error "${?}" 16 "Cannot create link to: ${RECORDINGS_STORAGE_ROOT_DIR}/${RECORDINGS_DIR}"
+	_check_command_and_exit_if_error "${?}" 22 "Cannot create link to: ${RECORDINGS_STORAGE_ROOT_DIR}/${RECORDINGS_DIR}"
 else
 	echo "The link already exists. No changes have been made."
 fi
@@ -675,7 +711,7 @@ echo "Checking for access to: ${ACCESS_RECORDINGS_DIR}"
 
 # /var/lib/mpd/music/Recordings
 if [[ ! -d "${ACCESS_RECORDINGS_DIR}" ]]; then
-	_exit_error 17 "Cannot find directory: ${ACCESS_RECORDINGS_DIR}"
+	_exit_error 23 "Cannot find directory: ${ACCESS_RECORDINGS_DIR}"
 fi
 
 _display_ok
@@ -690,7 +726,7 @@ echo "Updating mpd with the recordings directory: ${RECORDINGS_DIR}"
 
 mpc update > /dev/null
 
-_check_command_and_exit_if_error "${?}" 18 "Cannot get mpd to update the music directory: ${RECORDINGS_DIR}"
+_check_command_and_exit_if_error "${?}" 24 "Cannot get mpd to update the music directory: ${RECORDINGS_DIR}"
 
 _display_ok
 
@@ -700,10 +736,10 @@ _display_ok
 # Add the web server start up command to '/etc/rc.local'.
 ##################################################################
 
-echo "Checking for the web server start up command in: '/etc/rc.local'"
+echo "Checking for the web server start up command in: '${RC_LOCAL_FILE}'"
 
 # This allows multiple instances of the php web server on different ports.
-grep -q "/usr/bin/php\ -q\ -S\ ${_IP}:${WEB_SERVER_PORT}\ -t" "/etc/rc.local"
+grep -q "/usr/bin/php\ -q\ -S\ ${_IP}:${WEB_SERVER_PORT}\ -t" "${RC_LOCAL_FILE}"
 
 RV="${?}"
 
@@ -711,19 +747,23 @@ RV="${?}"
 # 1 = Not found.
 
 if [ 0 -ne ${RV} ]; then
-	echo "Adding the web server start up command to: '/etc/rc.local'"
+	echo "Adding the web server start up command to: '${RC_LOCAL_FILE}'"
 
-	# At the bottom and just before the last  'exit 0' statement add the following:
+	# At the bottom and just before the last 'exit 0' statement add the following:
 
-	sed -e '$s/*exit.*/# Start the radio recorder web server.\n/usr/bin/php -q -S ${_IP}:${WEB_SERVER_PORT} -t ${RADIO_RECORDER_WEB_SITE_DIR} >/dev/null 2>&1\n&/' "/etc/rc.local"
+	# Delete the exit.
+	sed -i '/exit.*/d' "${RC_LOCAL_FILE}"
 
-	#sed 's/.*exit.*/# Start the radio recorder web server.\n/usr/bin/php -q -S ${_IP}:${WEB_SERVER_PORT} -t ${RADIO_RECORDER_WEB_SITE_DIR} >/dev/null 2>&1\n&/' "/etc/rc.local"
+	_check_command_and_exit_if_error "${?}" 25 "Cannot add the web server start up command in: '${RC_LOCAL_FILE}'"
 
-	_check_command_and_exit_if_error "${?}" 19 "Cannot add the web server start up command in: '/etc/rc.local'"
+	echo -e "# Start the radio recorder web server.
+/usr/bin/php -q -S ${_IP}:${WEB_SERVER_PORT} -t ${RADIO_RECORDER_WEB_SITE_DIR} >/dev/null 2>&1
+
+exit 0" >> "${RC_LOCAL_FILE}"
 
 	_display_ok
 else
-	echo "The web server start up command has already been added to: '/etc/rc.local'"
+	echo "The web server start up command has already been added to: '${RC_LOCAL_FILE}'"
 fi
 
 

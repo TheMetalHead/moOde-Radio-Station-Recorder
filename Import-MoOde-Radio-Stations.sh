@@ -113,6 +113,12 @@ _display_ok() {
 
 
 
+_remove_last_slash() {
+	 echo "${1%/}"
+}
+
+
+
 # Prompts the user to enter Yes or No and returns 1 if YES else 0 if NO.
 #
 # Usage: _get_yes_no <Optional prompt>
@@ -162,7 +168,7 @@ fi
 # Check to see if we can find the web server files.
 ##################################################################
 
-readonly	RADIORECORDER_DIR="${1}"
+readonly	RADIORECORDER_DIR=$( _remove_last_slash "${1}" )
 
 # If the directory does not exist.
 if [[ ! -d "${RADIORECORDER_DIR}" ]]; then

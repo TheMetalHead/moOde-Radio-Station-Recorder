@@ -48,11 +48,11 @@
 ##################################################################
 
 # Returns the full path and name of this script.
-# /home/pi/RadioRecorder/Install-Radio-Station-Recorder.sh
+# /home/pi/Src/moOde-Radio-Station-Recorder/Install-Radio-Station-Recorder.sh
 readonly	FULLPATHNAME=$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null||echo "$0")
 
 # The directory where this script resides.
-# /home/pi/RadioRecorder
+# /home/pi/Src/moOde-Radio-Station-Recorder
 readonly	DIRECTORY=$(dirname "${FULLPATHNAME}")
 
 readonly	RADIO_RECORDER_DIR="RadioRecorder"
@@ -156,6 +156,12 @@ _cd_func() {
 	fi
 
 	return 1
+}
+
+
+
+_remove_last_slash() {
+	 echo "${1%/}"
 }
 
 
@@ -332,10 +338,10 @@ fi
 # Grab the command line arguments. There is no error checking.
 ##################################################################
 
-WEB_SERVER_ROOT_DIR="$1"
+WEB_SERVER_ROOT_DIR=$( _remove_last_slash "${1}" )
 WEB_SERVER_PORT="$2"
-RECORDINGS_STORAGE_ROOT_DIR="$3"
-RECORDINGS_DIR="$4"
+RECORDINGS_STORAGE_ROOT_DIR=$( _remove_last_slash "${3}" )
+RECORDINGS_DIR=$( _remove_last_slash "${4}" )
 
 
 
@@ -405,7 +411,7 @@ trap	_exit_trap	EXIT ERR SIGHUP SIGINT SIGQUIT SIGABRT SIGTERM
 
 RC_LOCAL_FILE="/etc/rc.local"
 
-echo "Checking if the php web server is free in: '${RC_LOCAL_FILE}'"
+echo "Checking if the php web server is installed in: '${RC_LOCAL_FILE}'"
 
 grep -q "/usr/bin/php" "${RC_LOCAL_FILE}"
 
@@ -415,28 +421,31 @@ RV="${?}"
 # 1 = Not found.
 
 if [ 0 -eq ${RV} ]; then
-	_exit_error 5 "The php web server is already being used: '${RC_LOCAL_FILE}'"
-fi
+	# The php web server is already being used. Ensure the port used is the same.
+	grep -q "/usr/bin/php\ -q\ -S\ ${_IP}:${WEB_SERVER_PORT}\ -t" "${RC_LOCAL_FILE}"
 
-_display_ok
+	RV="${?}"
 
+	# 0 = Found.
+	# 1 = Not found.
 
+	if [ 0 -ne ${RV} ]; then
+		_exit_error 5 "The php web server is already being used in: '${RC_LOCAL_FILE}' but the port is different from ours: '${WEB_SERVER_PORT}'"
+	fi
+else
+	# The php web server is not being used so check if the port is free.
+	echo "Checking if the web server port is free."
 
-##################################################################
-# Check if the web server port is free.
-##################################################################
+	nc -z "${_IP}" "${WEB_SERVER_PORT}" > /dev/null
 
-echo "Checking if the web server port is free."
+	RV="${?}"
 
-nc -z "${_IP}" "${WEB_SERVER_PORT}" > /dev/null
+	# 0 = Not free.
+	# 1 = Free.
 
-RV="${?}"
-
-# 0 = Not free.
-# 1 = Free.
-
-if [ 0 -eq ${RV} ]; then
-	_exit_error 6 "The web server port (${WEB_SERVER_PORT}) is already being used: '${RC_LOCAL_FILE}'"
+	if [ 0 -eq ${RV} ]; then
+		_exit_error 6 "The web server port (${WEB_SERVER_PORT}) is already being used: '${RC_LOCAL_FILE}'"
+	fi
 fi
 
 _display_ok
@@ -541,49 +550,52 @@ if [[ ! -d "${RADIO_RECORDER_WEB_SITE_DIR}" ]]; then
 	if [[ ! -d "${RADIO_RECORDER_WEB_SITE_DIR}" ]]; then
 		_exit_error 12 "Cannot find directory: ${RADIO_RECORDER_WEB_SITE_DIR}"
 	fi
+fi
 
-	_display_ok
-
-
-
-	##################################################################
-	# Install the radio recorder web server files.
-	##################################################################
-
-	echo "Changing directory to: ${RADIO_RECORDER_WEB_SITE_DIR}"
-
-	# cd "${RADIO_RECORDER_WEB_SITE_DIR}"
-	_cd_func "${RADIO_RECORDER_WEB_SITE_DIR}"
-
-	_check_command_and_exit_if_error "${?}" 13 "Cannot change directory to: ${RADIO_RECORDER_WEB_SITE_DIR}"
-
-	echo "Downloading the radio recorder gui file from: ${DOWNLOAD_RADIO_REC_WEB_GUI}"
-
-	wget "${DOWNLOAD_RADIO_REC_WEB_GUI}" -O "RadioRecorder.tar.gz"
-
-	_check_command_and_exit_if_error "${?}" 14 "Cannot download the file: ${DOWNLOAD_RADIO_REC_WEB_GUI}"
-
-	echo "Extracting the files:"
-
-	tar -x -f RadioRecorder.tar.gz
-
-	_check_command_and_exit_if_error "${?}" 15 "Cannot extract the file: RadioRecorder.tar.gz"
-
-	# Remove the downloaded file.
-
-	rm RadioRecorder.tar.gz
-
-	_display_ok
+_display_ok
 
 
 
-	##################################################################
-	# Create the radio recorder settings file.
-	##################################################################
+##################################################################
+# Download and install the radio recorder web server files.
+# WARNING: This will overwrite any existing radio recorder web server files.
+##################################################################
 
-	echo "Creating the radio recorder settings file: '${RADIO_RECORDER_WEB_SITE_DIR}/res/settings.php'"
+echo "Changing directory to: ${RADIO_RECORDER_WEB_SITE_DIR}"
 
-	echo "<?php
+# cd "${RADIO_RECORDER_WEB_SITE_DIR}"
+_cd_func "${RADIO_RECORDER_WEB_SITE_DIR}"
+
+_check_command_and_exit_if_error "${?}" 13 "Cannot change directory to: ${RADIO_RECORDER_WEB_SITE_DIR}"
+
+echo "Downloading the radio recorder gui file from: ${DOWNLOAD_RADIO_REC_WEB_GUI}"
+
+wget "${DOWNLOAD_RADIO_REC_WEB_GUI}" -O "RadioRecorder.tar.gz"
+
+_check_command_and_exit_if_error "${?}" 14 "Cannot download the file: ${DOWNLOAD_RADIO_REC_WEB_GUI}"
+
+echo "Extracting the files:"
+
+tar -x -f RadioRecorder.tar.gz
+
+_check_command_and_exit_if_error "${?}" 15 "Cannot extract the file: RadioRecorder.tar.gz"
+
+# Remove the downloaded file.
+
+rm RadioRecorder.tar.gz
+
+_display_ok
+
+
+
+##################################################################
+# Create the radio recorder settings file.
+# WARNING: This will overwrite any existing radio recorder settings file.
+##################################################################
+
+echo "Creating the radio recorder settings file: '${RADIO_RECORDER_WEB_SITE_DIR}/res/settings.php'"
+
+echo "<?php
 
 class Settings {
 
@@ -600,17 +612,11 @@ class Settings {
 
 ?>" > res/settings.php
 
-	chown -R "${OWNER}" "${RADIO_RECORDER_WEB_SITE_DIR}"
+chown -R "${OWNER}" "${RADIO_RECORDER_WEB_SITE_DIR}"
 
-	_check_command_and_exit_if_error "${?}" 16 "Cannot change owner for: ${RADIO_RECORDER_WEB_SITE_DIR}"
+_check_command_and_exit_if_error "${?}" 16 "Cannot change owner for: ${RADIO_RECORDER_WEB_SITE_DIR}"
 
-	_display_ok
-
-
-
-else
-	echo "The web server directory already exists. No changes have been made."
-fi
+_display_ok
 
 
 
@@ -738,8 +744,8 @@ _display_ok
 
 echo "Checking for the web server start up command in: '${RC_LOCAL_FILE}'"
 
-# This allows multiple instances of the php web server on different ports.
-grep -q "/usr/bin/php\ -q\ -S\ ${_IP}:${WEB_SERVER_PORT}\ -t" "${RC_LOCAL_FILE}"
+# Is the start up command not installed.
+grep -q "/usr/bin/php" "${RC_LOCAL_FILE}"
 
 RV="${?}"
 

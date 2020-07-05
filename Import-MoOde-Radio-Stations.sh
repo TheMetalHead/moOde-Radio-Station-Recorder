@@ -276,6 +276,9 @@ Lines without a semicolon will be ignored, too
 // or on the web interface!
 // it is also possible to add streamripper parameter to a specific station" > "${RADIO_STREAMS}"
 
+Skipped=0
+Converted=0
+
 for STATION in "${MPD_MUSIC_DIR}/RADIO/"*.pls; do
 	echo "Importing: ${STATION}"		# Zen FM.pls
 
@@ -306,17 +309,35 @@ for STATION in "${MPD_MUSIC_DIR}/RADIO/"*.pls; do
 
 			if [[ "$INI__playlist__File1" == *.m3u8 ]]; then
 				echo -e "\tIgnoring because cannot record from .m3u8 streams."
+
+				let Skipped=++Skipped
 			else
 				# Places the recording in the 'Recordings' directory as '${INI__playlist__Title1"} - 2020_06_26_22_11_00.mp3'.
 				echo "${INI__playlist__Title1} - One track;${INI__playlist__File1};-u \"FreeAmp/2.x\" -A -a \"%S - %d\" -k 0 -o always" >> "${RADIO_STREAMS}"
 
 				echo "${INI__playlist__Title1} - Rip tracks;${INI__playlist__File1};-u \"FreeAmp/2.x\" -D \"%A - %T\" -k 0 -o always" >> "${RADIO_STREAMS}"
+
+				let Converted=++Converted
 			fi
 
-			echo ""
+			INI__playlist__Title1=""
+			INI__playlist__File1=""
+		else
+			let Skipped=++Skipped
 		fi
+	else
+		let Skipped=++Skipped
 	fi
+
+	echo ""
 done
+
+echo ""
+echo "${Converted} stations imported ok."
+
+if [[ 0 != ${skipped} ]]; then
+	echo "${Skipped} stations cannot be imported."
+fi
 
 chmod 755 "${RADIO_STREAMS}"
 

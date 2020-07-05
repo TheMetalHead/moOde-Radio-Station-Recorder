@@ -260,6 +260,12 @@ readonly	RADIO_STREAMS="${RADIORECORDER_DIR}/res/streams.txt"
 # Ensure we can write to the file.
 chmod 755 "${RADIO_STREAMS}"
 
+RV="${?}"
+
+if [ 0 -ne ${RV} ]; then
+	_exit_error 6 "Cannot change file mode to 755 for: ${RADIO_STREAMS}"
+fi
+
 echo "// Lines with starting '//' are not interpreted
 Lines without a semicolon will be ignored, too
 //Therefore empty lines can be used to get a better overview in this file
@@ -313,5 +319,11 @@ for STATION in "${MPD_MUSIC_DIR}/RADIO/"*.pls; do
 done
 
 chmod 755 "${RADIO_STREAMS}"
+
+RV="${?}"
+
+if [ 0 -ne ${RV} ]; then
+	_exit_error 7 "Cannot change file mode to 755 for: ${RADIO_STREAMS}"
+fi
 
 _display_ok

@@ -335,7 +335,7 @@ fi
 
 
 ##################################################################
-# Courtesy of 'Kent', 'TheOldPresbyope', 'http://moodeaudio.org/forum/member.php?action=profile&uid=28',
+# Courtesy of Kent, 'TheOldPresbyope', 'http://moodeaudio.org/forum/member.php?action=profile&uid=28'
 # for reading the php manual and pointing me in the right direction.
 # This makes the php web server listen on all interfaces and allow it to work
 # from any IP address assigned by the networks DHCP instead of a fixed IP address.

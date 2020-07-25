@@ -2,7 +2,7 @@
 
 Instructions for a simple radio station recorder for moOde http://moodeaudio.org/.
 
-It consists of a separate web server to schedule the recording of a radio station. This then updates moOde/mpd with the new recordings that appear in a directory called Recordings in the library. This has been tried on moOde versions 6.4.2 and 6.5.2
+It consists of a separate web server to schedule the recording of a radio station. This then updates moOde/mpd with the new recordings that appear in a directory called Recordings in the library. This has been tried on moOde versions 6.4.2 onwards.
 
 The following stream formats are supported by the stream ripper: mp3, nsv, aac, and ogg. I have only tried two formats, mp3 is ok, aac had audio interruptions. m3u8 streams are not supported.
 
@@ -26,6 +26,8 @@ To install into the home directory /home/pi/RadioRecorder using the recording di
 
 Reboot moOde.
 
+Note: the directory /media/DA1A-71FE must already exist. In this case it is a mounted external usb drive.
+
 # Usage:
 
 Access the web interface using:
@@ -46,7 +48,7 @@ Create the stream to rip:
 
 You may need to add -u "FreeAmp/2.x" to the 'Additional Parameter' when creating the stream to rip.
 
-The above places the recording in the 'Recordings' directory as '2020-06-26-09-06-00 name of recording.mp3'.
+The above places the recording in the 'Recordings' directory as '2020-06-26-09-06-00 name of track.mp3'.
 
 
 
